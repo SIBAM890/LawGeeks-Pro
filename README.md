@@ -4,7 +4,7 @@ An intelligent paralegal assistant that simplifies and explains complex legal do
 
 🚀 About The Project
 
-Legal documents—such as rental agreements, loan contracts, and terms of service—are often full of dense, technical language. This creates confusion and potential risks for individuals.
+Legal documents such as rental agreements, loan contracts, and terms of service—are often full of dense, technical language. This creates confusion and potential risks for individuals.
 
 LawGeeks-Pro helps bridge this gap by offering a clear, private, and supportive environment to:
 
@@ -133,3 +133,4 @@ LawGeeks-Pro/
 ⚖️ Disclaimer
 
 LawGeeks-Pro provides informational analysis only and should not be considered legal advice. Always consult a licensed legal professional for official guidance.
+
