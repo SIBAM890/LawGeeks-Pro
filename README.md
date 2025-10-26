@@ -97,40 +97,8 @@ python ingest.py
 cd ..
 uvicorn api.index:app --reload
 
-
-8. Open in your browser
-
-http://127.0.0.1:8000
-
-📂 Project Structure
-LawGeeks-Pro/
-│
-├── api/                  # Backend (FastAPI)
-│   ├── core/
-│   │   ├── ai_services.py     # Document analysis logic
-│   │   └── rag_services.py    # RAG chat logic
-│   ├── models/
-│   │   └── pydantic_models.py # Request/response models
-│   └── index.py              # Main API routes
-│
-├── public/               # Frontend (HTML + Tailwind)
-│   ├── index.html
-│   └── app.html
-│
-├── scripts/
-│   ├── .env               # Environment variables
-│   └── ingest.py          # Build the vector database
-│
-├── vector_db/             # Vector store (excluded from Git)
-├── knowledge_base/        # Legal datasets for RAG
-│   ├── government_acts/
-│   └── ...
-│
-├── .gitignore
-├── requirements.txt
-└── README.md
-
 ⚖️ Disclaimer
 
 LawGeeks-Pro provides informational analysis only and should not be considered legal advice. Always consult a licensed legal professional for official guidance.
+
 
