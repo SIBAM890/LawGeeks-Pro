@@ -13,10 +13,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="./dashboard.css">
-    
 </head>
 <body class="min-h-screen">
-    <!-- NAVBAR -->
     <nav class="navbar">
         <div class="flex items-center justify-between w-full">
             <a href="./home.html" class="logo-container">
@@ -33,13 +31,11 @@
         </div>
     </nav>
 
-    <!-- MAIN CONTENT -->
     <div class="px-6 pb-6 grid grid-cols-1 lg:grid-cols-3 gap-6" style="min-height: calc(100vh - 120px); align-content: start;">
-        <!-- LEFT SIDEBAR -->
-        <div class="glass-card p-6" style="display: flex; flex-direction: column; max-height: calc(100vh - 140px); overflow-y: auto;">
+        
+        <div id="left-sidebar" class="glass-card p-6" style="display: flex; flex-direction: column; max-height: calc(100vh - 140px); overflow-y: auto;">
             <h2 class="text-3xl font-bold mb-6" style="color: var(--text-dark);">Analyze Document</h2>
             
-            <!-- Text Input -->
             <div class="mb-6">
                 <label class="block text-sm font-semibold mb-3 uppercase tracking-wide" style="color: var(--text-gray);">Write or Paste Text</label>
                 <textarea 
@@ -51,14 +47,12 @@
                 ></textarea>
             </div>
 
-            <!-- Divider -->
             <div class="relative flex items-center my-6">
                 <div class="flex-grow border-t" style="border-color: rgba(0, 0, 0, 0.1);"></div>
                 <span class="px-4 text-sm font-semibold" style="color: var(--text-gray);">OR</span>
                 <div class="flex-grow border-t" style="border-color: rgba(0, 0, 0, 0.1);"></div>
             </div>
 
-            <!-- Upload Section -->
             <div class="mb-6">
                 <label class="block text-sm font-semibold mb-3 uppercase tracking-wide" style="color: var(--text-gray);">Upload a File</label>
                 <div class="relative">
@@ -103,15 +97,12 @@
                 <div id="file-name" class="mt-3"></div>
             </div>
 
-            <!-- Analyze Button -->
             <button id="analyze-button" class="action-btn-secondary w-full text-lg font-bold">
                 <span><i class="fas fa-magic"></i> Analyze Document</span>
             </button>
         </div>
 
-        <!-- RIGHT CONTENT AREA -->
-        <div class="lg:col-span-2 glass-card flex flex-col overflow-hidden">
-            <!-- Tab Navigation + Action Buttons -->
+        <div id="main-content" class="lg:col-span-2 glass-card flex flex-col overflow-hidden">
             <div class="flex items-center justify-between border-b px-6 py-4" style="border-color: rgba(0, 0, 0, 0.08);">
                 <div class="flex gap-2">
                     <button id="tab-dashboard" class="tab-btn tab-btn-active">Dashboard</button>
@@ -122,28 +113,22 @@
                 <div id="action-buttons" class="hidden flex items-center gap-2 flex-wrap"></div>
             </div>
 
-            <!-- Content Area -->
             <div id="results-container" class="flex-grow overflow-y-auto p-6 custom-scrollbar">
-                <!-- Placeholder -->
                 <div id="analysis-placeholder" class="flex flex-col items-center justify-center h-full">
                     <div class="text-6xl mb-4"><i class="fas fa-chart-bar" style="color: var(--primary-color);"></i></div>
                     <p class="text-xl font-semibold" style="color: var(--text-gray);">Your analysis will appear here</p>
                     <p class="text-sm mt-2" style="color: var(--text-gray);">Upload a document to get started</p>
                 </div>
 
-                <!-- Loading -->
                 <div id="analysis-loading" class="hidden flex flex-col items-center justify-center h-full">
                     <div class="loader mb-4"></div>
                     <p id="loading-status" class="text-lg font-semibold" style="color: var(--text-dark);">Analyzing document...</p>
                 </div>
 
-                <!-- Dashboard View -->
                 <div id="view-dashboard" class="hidden space-y-6"></div>
 
-                <!-- Full Analysis View -->
                 <div id="view-full-analysis" class="hidden prose prose-lg max-w-none"></div>
 
-                <!-- Chat View -->
                 <div id="view-chat" class="hidden h-full flex flex-col">
                     <div id="chat-window" class="flex-grow overflow-y-auto mb-4 space-y-2 custom-scrollbar pr-2"></div>
                     <div class="flex gap-2">
@@ -164,6 +149,7 @@
         let currentAnalysisResult = '';
         let documentContentForAnalysis = '';
 
+        // DOM Elements
         const elements = {
             analyzeButton: document.getElementById('analyze-button'),
             textInput: document.getElementById('text-input'),
@@ -187,6 +173,10 @@
             chatInput: document.getElementById('chat-input'),
             chatSend: document.getElementById('chat-send'),
         };
+
+        // Main Sections safe selection
+        const leftSidebar = document.getElementById('left-sidebar');
+        const mainContent = document.getElementById('main-content');
 
         // Dropdown toggle handler
         elements.uploadDropdownBtn.addEventListener('click', () => {
@@ -320,9 +310,37 @@
             }
         }
 
+        // Modified setLoading to prevent placeholder conflict
+        function setLoading(isLoading, message = 'Analyzing...') {
+            elements.analysisLoading.classList.toggle('hidden', !isLoading);
+            elements.loadingStatus.textContent = message;
+            
+            if(isLoading) {
+                // When loading starts, hide everything else
+                elements.analysisPlaceholder.classList.add('hidden');
+                elements.actionButtons.classList.add('hidden');
+                Object.values(elements.views).forEach(v => v.classList.add('hidden'));
+            }
+            // When loading stops, do NOT automatically show placeholder.
+            // We let displayAnalysisResults handle what to show.
+        }
+
+        // UPDATED displayAnalysisResults with Sidebar Logic and Scroll Fix
         function displayAnalysisResults(text, isTranslation = false) {
-            // Add action buttons
+            // 1. Hide Sidebar
+            if (leftSidebar) {
+                leftSidebar.style.display = 'none';
+            }
+            
+            // 2. Expand Main Content
+            if (mainContent) {
+                mainContent.classList.remove('lg:col-span-2');
+                mainContent.classList.add('lg:col-span-3');
+            }
+
+            // 3. Add Action Buttons including BACK button
             elements.actionButtons.innerHTML = `
+                <button id="back-btn" class="action-btn text-sm">← Back to Upload</button>
                 <button id="listen-btn" class="action-btn text-sm">🔊 Listen</button>
                 <button id="download-report-btn" class="action-btn text-sm">📥 Download PDF</button>
                 <select id="translate-select" class="text-sm">
@@ -342,11 +360,13 @@
             `;
             elements.actionButtons.classList.remove('hidden');
 
+            // 4. Attach Event Listeners
+            document.getElementById('back-btn').addEventListener('click', showUploadForm);
             document.getElementById('listen-btn').addEventListener('click', speakAnalysis);
             document.getElementById('download-report-btn').addEventListener('click', downloadReport);
             document.getElementById('translate-select').addEventListener('change', (e) => translateAnalysis(e.target.value));
 
-            // Parse sections
+            // 5. Parse Analysis Text
             const sections = {};
             const parts = text.split('### ').slice(1);
             parts.forEach(part => {
@@ -354,7 +374,7 @@
                 sections[title.trim().replace(/:/g, '')] = content.join('\n').trim();
             });
 
-            // Extract risk score
+            // 6. Extract Risk Score
             let riskScore = 50;
             let riskJustification = "Could not be determined from the analysis.";
             const scoreSectionText = sections['Vigilance Score (1-100) and Justification'];
@@ -367,11 +387,10 @@
                 riskJustification = scoreSectionText.replace(/(\d+)/, '').replace(/[*.]/g, '').trim();
             }
 
-            // Build Dashboard View
+            // 7. Build Dashboard View
             const riskRotation = (riskScore / 100) * 180 - 90;
             
             elements.views.dashboard.innerHTML = `
-                <!-- Vigilance Meter -->
                 <div class="glass-card p-8">
                     <h3 class="text-2xl font-bold mb-6 text-center" style="color: var(--text-dark);">Vigilance Score</h3>
                     <div class="vigilance-meter">
@@ -387,7 +406,6 @@
                     <p class="text-sm text-center italic mt-4" style="color: var(--text-gray);">${riskJustification}</p>
                 </div>
 
-                <!-- Stats Grid -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="stat-badge stat-badge-pink">
                         <div style="color: var(--text-dark); font-weight: 600; margin-bottom: 0.5rem;">Risk Meter</div>
@@ -399,7 +417,6 @@
                     </div>
                 </div>
 
-                <!-- Summary Section -->
                 ${sections['Summary'] ? `
                 <div class="glass-card p-6">
                     <h3 class="text-2xl font-bold mb-4" style="color: var(--text-dark);">Summary</h3>
@@ -407,7 +424,6 @@
                 </div>
                 ` : ''}
 
-                <!-- Key Insights -->
                 ${sections['Key Insights'] ? `
                 <div class="glass-card p-6">
                     <h3 class="text-2xl font-bold mb-4" style="color: var(--text-dark);">Key Insights</h3>
@@ -415,7 +431,6 @@
                 </div>
                 ` : ''}
 
-                <!-- Important Mentions -->
                 ${sections['Important Mentions'] ? `
                 <div class="glass-card p-6">
                     <h3 class="text-2xl font-bold mb-4" style="color: var(--text-dark);">Important Mentions</h3>
@@ -424,7 +439,7 @@
                 ` : ''}
             `;
 
-            // Build Full Analysis View
+            // 8. Build Full Analysis View
             let fullAnalysisHtml = '';
             parts.forEach(part => {
                 const [title, ...content] = part.split('\n');
@@ -437,12 +452,44 @@
             });
             elements.views['full-analysis'].innerHTML = fullAnalysisHtml;
 
+            // 9. Show correct tab
             if (isTranslation) {
                 switchTab('full-analysis');
-                return;
+            } else {
+                switchTab('dashboard');
             }
 
-            switchTab('dashboard');
+            // 10. SCROLL FIX: Reset scroll to top
+            const resultsContainer = document.getElementById('results-container');
+            resultsContainer.scrollTop = 0;
+            if (window.innerWidth < 1024) {
+                resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // NEW Function to go back to upload form
+        function showUploadForm() {
+            // 1. Show Sidebar
+            if (leftSidebar) {
+                leftSidebar.style.display = 'flex';
+            }
+            
+            // 2. Shrink Main Content
+            if (mainContent) {
+                mainContent.classList.remove('lg:col-span-3');
+                mainContent.classList.add('lg:col-span-2');
+            }
+            
+            // 3. Hide Buttons, Show Placeholder
+            elements.actionButtons.classList.add('hidden');
+            elements.analysisPlaceholder.classList.remove('hidden');
+            Object.values(elements.views).forEach(v => v.classList.add('hidden'));
+            
+            // 4. Reset Tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('tab-btn-active');
+            });
+            document.getElementById('tab-dashboard').classList.add('tab-btn-active');
         }
 
         function formatContent(text) {
@@ -469,17 +516,6 @@
             });
             const activeBtn = document.getElementById(`tab-${tab}`);
             if (activeBtn) activeBtn.classList.add('tab-btn-active');
-        }
-
-        function setLoading(isLoading, message = 'Analyzing...') {
-            elements.analysisLoading.classList.toggle('hidden', !isLoading);
-            elements.loadingStatus.textContent = message;
-            elements.analysisPlaceholder.classList.toggle('hidden', isLoading);
-            
-            if(isLoading) {
-                elements.actionButtons.classList.add('hidden');
-                Object.values(elements.views).forEach(v => v.classList.add('hidden'));
-            }
         }
 
         function downloadReport() {
@@ -570,7 +606,12 @@
                 alert("Sorry, there was an error generating the PDF report.");
             } finally {
                 setLoading(false);
-                switchTab('dashboard');
+                // Restore view without toggling placeholders
+                if(document.getElementById('tab-full-analysis').classList.contains('tab-btn-active')){
+                    switchTab('full-analysis');
+                } else {
+                    switchTab('dashboard');
+                }
             }
         }
 
