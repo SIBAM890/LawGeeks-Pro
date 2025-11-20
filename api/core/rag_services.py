@@ -1,9 +1,9 @@
 import os
 from dotenv import load_dotenv
+from operator import itemgetter  # <--- Added this import for safe data extraction
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 from langchain_chroma import Chroma
 from langchain.prompts import ChatPromptTemplate
-from langchain.schema.runnable import RunnablePassthrough
 from langchain.schema.output_parser import StrOutputParser
 
 # Load environment variables
@@ -32,7 +32,7 @@ class RAGService:
 
         # 3. Initialize LLM
         self.llm = ChatGoogleGenerativeAI(
-            model="models/gemini-pro-latest", # <--- THIS IS THE FIX
+            model="models/gemini-pro-latest", 
             google_api_key=self.api_key,
             temperature=0.3
         )
@@ -69,18 +69,6 @@ class RAGService:
         **Your Answer:**
         """
         self.rag_prompt = ChatPromptTemplate.from_template(rag_prompt_template)
-        
-        # 5. Create the RAG Chain (using LCEL)
-        self.rag_chain = (
-            {
-                "rag_context": self.retriever | self._format_docs, 
-                "question": RunnablePassthrough(),
-                "document_context": RunnablePassthrough()
-            }
-            | self.rag_prompt
-            | self.llm
-            | StrOutputParser()
-        )
 
     def _format_docs(self, docs):
         # Helper to join retrieved docs into a single string
@@ -91,33 +79,23 @@ class RAGService:
         Answers a user's question using the RAG pipeline.
         """
         try:
-            # We pass a dict to the chain that matches the keys in the first part
-            # of the chain. "document_context" is passed straight through.
-            # "question" is passed straight through.
-            # The retriever is called *with* the "question" to get "rag_context".
-            
-            # NOTE: LangChain's retriever pipeline is invoked with the entire input dict.
-            # By default, the retriever's input is the "question" key.
-            # We need to pass the *other* keys through manually.
-            
+            # We use itemgetter to safely extract specific keys from the input dict
+            # This prevents the "expected string, got dict" error
             rag_chain = (
                 {
-                    "rag_context": self.retriever,
-                    "question": RunnablePassthrough(),
-                    "document_context": RunnablePassthrough() # Pass document_context through
+                    # 1. Get 'question', search DB, then format results
+                    "rag_context": itemgetter("question") | self.retriever | self._format_docs,
+                    # 2. Pass the 'question' straight through
+                    "question": itemgetter("question"),
+                    # 3. Pass the 'document_context' straight through
+                    "document_context": itemgetter("document_context")
                 }
-                | RunnablePassthrough.assign(
-                    rag_context=lambda x: self._format_docs(x["rag_context"]),
-                    document_context=lambda x: x["document_context"] # Ensure it's passed
-                )
                 | self.rag_prompt
                 | self.llm
                 | StrOutputParser()
             )
             
             # Invoke the chain
-            # The input to the retriever will be the 'question'
-            # The other keys ('document_context') will be passed along
             response = rag_chain.invoke({
                 "question": user_question, 
                 "document_context": document_text

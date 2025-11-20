@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse # <--- Added this import
 from fastapi.middleware.cors import CORSMiddleware
 from api.models.pydantic_models import (
     AnalyzeRequest, AnalyzeResponse,
@@ -8,6 +9,7 @@ from api.models.pydantic_models import (
 from api.core.ai_services import AIService
 from api.core.rag_services import RAGService
 import uvicorn
+import os
 
 app = FastAPI(
     title="LawGeeks API",
@@ -44,7 +46,7 @@ async def analyze_document(request: AnalyzeRequest):
     if not ai_service:
         raise HTTPException(status_code=500, detail="AI Service not initialized.")
     try:
-        # This now returns a single markdown string
+        # This returns a single markdown string
         analysis_string = ai_service.get_document_overview(request.document_text)
         return AnalyzeResponse(analysis_text=analysis_string)
     except Exception as e:
@@ -70,7 +72,13 @@ async def chat_with_document(request: ChatRequest):
 
 
 # --- Static Frontend Serving ---
-# This serves index.html and app.html
+
+# 1. Serve home.html when the user visits the root url "/"
+@app.get("/")
+async def read_root():
+    return FileResponse("public/home.html")
+
+# 2. Serve all other static files (css, images, dashboard.html, etc.)
 app.mount("/", StaticFiles(directory="public", html=True), name="static")
 
 
