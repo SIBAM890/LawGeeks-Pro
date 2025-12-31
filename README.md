@@ -1,4 +1,4 @@
-LawGeeks-Pro ⚖️
+**LawGeeks-Pro** ⚖️
 
 An intelligent paralegal assistant that simplifies and explains complex legal documents using Retrieval-Augmented Generation (RAG) and document analysis.
 
@@ -100,5 +100,6 @@ uvicorn api.index:app --reload
 ⚖️ Disclaimer
 
 LawGeeks-Pro provides informational analysis only and should not be considered legal advice. Always consult a licensed legal professional for official guidance.
+
 
 
