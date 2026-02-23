@@ -1,104 +1,136 @@
-LawGeeks-Pro ⚖️
+# LawGeeks-Pro ⚖️
+> **Demystifying Legal Jargon with AI-Powered Intelligence**
 
-An intelligent paralegal assistant that simplifies and explains complex legal documents using Retrieval-Augmented Generation (RAG) and document analysis.
+[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![Google Gemini](https://img.shields.io/badge/Google%20Gemini-8E75B2?style=for-the-badge&logo=googlegemini)](https://ai.google.dev/)
+[![LangChain](https://img.shields.io/badge/LangChain-1C3C3C?style=for-the-badge&logo=langchain)](https://www.langchain.com/)
+[![ChromaDB](https://img.shields.io/badge/ChromaDB-000000?style=for-the-badge&logo=chroma)](https://www.trychroma.com/)
 
-🚀 About The Project
+An intelligent paralegal assistant that simplifies complex legal documents using **Retrieval-Augmented Generation (RAG)** and advanced document analysis. Built to bridge the gap between technical legal language and everyday understanding.
 
-Legal documents such as rental agreements, loan contracts, and terms of service—are often full of dense, technical language. This creates confusion and potential risks for individuals.
+---
 
-LawGeeks-Pro helps bridge this gap by offering a clear, private, and supportive environment to:
+## 🚀 Key Features
 
-Generate simple, human-readable summaries.
+-   **📄 Multi-Format Support**: Seamlessly analyze `.pdf`, `.docx`, images (`.png`, `.jpg`), or direct text input.
+-   **🔍 Automated Insights**: Generates structured summaries, extracts critical dates, identifies financial terms, and highlights key clauses.
+-   **🛡️ Vigilance Score**: A dynamic risk assessment (1–100) that flags unfair clauses and potential legal traps.
+-   **💬 RAG-Powered Q&A**: Ask context-aware questions grounded in your document and a pre-loaded knowledge base of Indian Law.
+-   **📊 Professional Reporting**: Export your analysis and insights into a clean, downloadable PDF report.
+-   **🌐 Accessibility**: Integrated text-to-speech engine and translation support for major Indian languages.
 
-Detect hidden risks, unfair clauses, and key financial terms.
+---
 
-Provide a Vigilance Score to rate potential risk (1–100).
+## 🏗️ System Architecture & Workflow
 
-Answer user questions about the document using a RAG system connected to a knowledge base of Indian law.
+LawGeeks-Pro utilizes a three-tier architecture combining a modern frontend, an asynchronous FastAPI backend, and a RAG (Retrieval-Augmented Generation) intelligence layer.
 
-(Built for the “Generative AI for Demystifying Legal Documents” challenge.)
+### Workflow Diagram (Simplified)
+```mermaid
+graph TD
+    User([User]) -->|Uploads Doc| FE[Web Frontend]
+    User -->|Asks Question| FE
+    FE -->|API Request| BE[FastAPI Backend]
+    
+    subgraph "AI Core"
+        BE -->|Analysis| Gemini[Google Gemini Pro]
+        BE -->|Retrieval| RAG[RAG Service]
+        RAG -->|Semantic Query| VectorDB[(Chroma Vector DB)]
+        VectorDB --- Search[Knowledge Base Search]
+    end
 
-⚙️ Core Features
+    Gemini --> BE
+    BE --> FE
+```
 
-Multi-Format Upload: Analyze .pdf, .docx, and image (.png, .jpg) files, or paste text directly.
+> **For a deep-dive into the technical implementation, please see our [Full System Architecture & Detailed Workflows](./SYSTEM_ARCHITECTURE.md) document.**
 
-Automated Analysis: Generates a dashboard with summaries, insights, and extracted details (dates, amounts, clauses).
+---
 
-Vigilance Score: Dynamic meter to visualize document risk.
+---
 
-RAG-Based Q&A: Ask context-aware questions (e.g., “What if I miss a payment?”) and get answers grounded in your document and the legal knowledge base.
+## 📂 File Structure
 
-Professional Report: Download results as a clean PDF report.
+```text
+LawGeeks-Pro/
+├── api/                    # Backend API Logic
+│   ├── core/               # AI & RAG service implementations
+│   ├── models/             # Pydantic data schemas
+│   └── index.py            # Main FastAPI application
+├── knowledge_base/         # PDF source documents for Indian Law
+├── public/                 # Web Frontend assets
+│   ├── assets/             # Images and icons
+│   ├── css/                # Tailwind & Custom styles
+│   ├── js/                 # Logic for analysis & chat
+│   └── home.html           # Landing page
+├── scripts/                # Utility & Setup scripts
+│   ├── ingest.py           # Vector database builder
+│   └── .env                # Environment configurations
+├── vector_db/              # Persisted ChromaDB data
+├── config/                 # Static configurations
+├── tests/                  # Unit and integration tests
+├── requirements.txt        # Python dependencies
+└── vercel.json             # Deployment configuration
+```
 
-Accessibility: Built-in text-to-speech and translation into multiple Indian languages.
+---
 
-🛠️ Tech Stack
+## 💻 Technolgoy Stack
 
-Backend: FastAPI, Uvicorn
+-   **Backend**: FastAPI, Uvicorn
+-   **AI/LLM**: Google Gemini (`gemini-pro-latest`)
+-   **RAG Framework**: LangChain, ChromaDB
+-   **Embeddings**: Google Generative AI Embeddings
+-   **Frontend**: HTML5, TailwindCSS, Vanilla JavaScript
+-   **PDF/Docs**: `pypdf`, `python-docx`, `tesseract-ocr`
 
-AI/LLM: Google Gemini (gemini-pro-latest)
+---
 
-RAG Framework: LangChain, ChromaDB, GoogleGenerativeAIEmbeddings
+## 🏁 Getting Started
 
-Frontend: HTML, TailwindCSS, Vanilla JavaScript
+### 1. Prerequisites
+-   Python 3.10+
+-   Google Gemini API Key ([Get it here](https://aistudio.google.com/))
 
-File Handling: pypdf, python-docx, tesseract
-
-🏁 How to Run Locally
-1. Prerequisites
-
-Python 3.10 or higher
-
-A Google Gemini API key
-
-2. Setup
-
-1. Clone the repository
-
+### 2. Installation
+```bash
+# Clone the repository
 git clone https://github.com/SIBAM890/LawGeeks-Pro.git
 cd LawGeeks-Pro
 
-
-2. Create and activate a virtual environment
-
-# Windows
+# Setup virtual environment
 python -m venv .venv
-.venv\Scripts\activate
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
-
-3. Install dependencies
-
+# Install dependencies
 pip install -r requirements.txt
+```
 
+### 3. Configuration
+1.  Navigate to `scripts/` and create a `.env` file:
+    ```env
+    GOOGLE_API_KEY="your_api_key_here"
+    ```
+2.  Place your reference legal PDFs in the `knowledge_base/` folder.
 
-4. Add your environment variables
-
-Go to the scripts/ folder and create a .env file:
-
-GOOGLE_API_KEY="YOUR_GEMINI_API_KEY_HERE"
-
-
-5. Add your legal knowledge base
-
-Place all relevant legal PDFs (e.g., Indian Contract Act, RERA guidelines) in the knowledge_base/ folder.
-
-These files power the RAG system.
-
-6. Build the vector database
-
+### 4. Build Vector DB & Run
+```bash
+# Ingest the knowledge base
 cd scripts
 python ingest.py
 
-
-(Re-run if you add new documents.)
-
-7. Start the application
-
+# Start the server
 cd ..
 uvicorn api.index:app --reload
+```
 
-⚖️ Disclaimer
+---
 
-LawGeeks-Pro provides informational analysis only and should not be considered legal advice. Always consult a licensed legal professional for official guidance.
+## ⚖️ Disclaimer
+*LawGeeks-Pro provides informational analysis only and should not be considered legal advice. Always consult a licensed legal professional for official guidance.*
+
+---
+Proudly built for the **Generative AI for Demystifying Legal Documents** challenge.
+
 
 
